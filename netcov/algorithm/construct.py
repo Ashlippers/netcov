@@ -25,7 +25,7 @@ from ..datamodel.configtypes import *
 from .templates import all_lazy_templates
 
 
-def build_control_plane_datamodel(network: Network):
+def build_control_plane_datamodel(network: Network, border_sessions: List[Dict[str, Any]]):
     """build a custom python datamodel for control plane coverage. Information is
     retrieved via Batfish questions and is organized in a "Network" object.
     """
@@ -88,6 +88,21 @@ def build_control_plane_datamodel(network: Network):
                 configs.append(BgpPeerConfigP2p(rec.Node, rec.VRF, rec.Is_Passive, rec.Local_AS, rec.Export_Policy,\
                     rec.Import_Policy, rec.Peer_Group, rec.Local_IP, rec.Remote_IP, rec.Remote_AS))
         vrf.bgp_peer_configs.extend(configs)
+
+    # override border bgp sessions
+    for border_session in border_sessions:
+        device_name = border_session["node"]
+        local_ip = border_session["local_ip"]
+        remote_as = border_session["remote_as"]
+        remote_ip = border_session["remote_ip"]
+        device = network.devices[device_name]
+        session = device.find_bgp_session_with_as_ip(remote_as, remote_ip)
+        # override
+        session.local_ip = local_ip
+        session.established_status = "ESTABLISHED"
+        session.is_border = True
+        #session.peer = f"EXT_PEER({remote_as}, {remote_ip})"
+        session.peer = f"isp_{remote_as}"
 
     # bgp edges
     for device_name, vrf_name, device, vrf in network.iter_vrfs():
@@ -377,6 +392,11 @@ def load_external_bgp_announcements(filename):
         records = content["Announcements"]
         return records
     
+def load_border_sessions(filename):
+    with open(filename) as infile:
+        records = json.load(infile)
+        return records
+
 def pickle_network(network: Network, filename) -> None:
     with open(filename, 'wb') as outfile:
         pickle.dump(network, outfile)

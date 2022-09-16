@@ -41,7 +41,9 @@ class Coverage:
     def _init_control_plane_datamodel(self) -> None:
         status_before = self.is_active
         self.is_active = False
-        build_control_plane_datamodel(self.model)
+        border_session_file = os.path.join(self.model.snapshot_path, "border_sessions.json")
+        border_sessions = load_border_sessions(border_session_file) if os.path.exists(border_session_file) else []
+        build_control_plane_datamodel(self.model, border_sessions)
         self.is_active = status_before
 
     def _init_data_plane_datamodel(self) -> None:
