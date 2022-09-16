@@ -102,7 +102,7 @@ def build_control_plane_datamodel(network: Network, border_sessions: List[Dict[s
         session.established_status = "ESTABLISHED"
         session.is_border = True
         #session.peer = f"EXT_PEER({remote_as}, {remote_ip})"
-        session.peer = f"isp_{remote_as}"
+        session.peer = f"isp_{remote_as}_{remote_ip}"
 
     # bgp edges
     for device_name, vrf_name, device, vrf in network.iter_vrfs():
@@ -379,7 +379,7 @@ def build_data_plane_datamodel(network: Network, ext_ras: List[Dict]=[]):
         peer_as = ra["asPath"][0][0]
         session = network.devices[device_name].find_bgp_session_with_as_ip(peer_as, peer_ip)
         vrf_name = session.vrf
-        border_edge = network.get_bgp_edge(f"isp_{peer_as}", "default", device_name, vrf_name)
+        border_edge = network.get_bgp_edge(f"isp_{peer_as}_{peer_ip}", "default", device_name, vrf_name)
         prefix = ra["network"]
         route = convert_external_ra(ra)
         border_edge.bgp_routes[prefix].append(route)
