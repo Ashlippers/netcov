@@ -157,6 +157,7 @@ def build_control_plane_datamodel(network: Network, border_sessions: List[Dict[s
         + TYPE_NAMES_ASPATH\
         + TYPE_NAMES_COMMUNITY\
         + TYPE_NAMES_BGP_PEER\
+        + TYPE_NAMES_BGP_GROUP
         # + TYPE_NAMES_PREFIXLIST
 
     for rec in structures_fr.itertuples():
