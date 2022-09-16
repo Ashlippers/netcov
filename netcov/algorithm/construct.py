@@ -351,6 +351,7 @@ def build_data_plane_datamodel(network: Network, ext_ras: List[Dict]=[]):
         return
 
     bf = network.bf
+    logger = logging.getLogger("__name__")
     routes: pd.DataFrame = bf.q.routes().answer().frame()
     bgpRoutes: pd.DataFrame = bf.q.bgpRib(status="/.*/").answer().frame()
 
@@ -391,6 +392,9 @@ def build_data_plane_datamodel(network: Network, ext_ras: List[Dict]=[]):
         session = network.devices[device_name].find_bgp_session_with_as_ip(peer_as, peer_ip)
         vrf_name = session.vrf
         border_edge = network.get_bgp_edge(f"isp_{peer_as}_{peer_ip}", "default", device_name, vrf_name)
+        if border_edge is None:
+            logger.warning(f"WARNING: cannot find bgp edge for external route annoucement {ra}")
+            continue
         prefix = ra["network"]
         route = convert_external_ra(ra)
         border_edge.bgp_routes[prefix].append(route)
