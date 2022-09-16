@@ -15,7 +15,7 @@ import logging
 from typing import Iterable
 import pickle
 import os
-from dd.autoref import BDD, Function
+from dd.cudd import BDD, Function
 
 from ..datamodel import *
 from .utils import *
