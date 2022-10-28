@@ -240,9 +240,9 @@ def test_case_internet2_bte(network: Network, sample: int = 1) -> Iterable[DNode
         else:
             sampled = rib[np.random.choice(rib.shape[0], nmax, replace=False)]
 
-        for route in sampled:
+        for route in sampled.view(type=np.recarray):
             route.Communities = ["11537:888", *route.Communities]
-        return [convert_bgp_route(rec) for rec in sampled]
+        return [convert_bgp_route(rec) for rec in sampled.view(type=np.recarray)]
 
         
     trps = []
